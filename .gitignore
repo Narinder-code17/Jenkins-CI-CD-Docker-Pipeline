@@ -1,0 +1,17 @@
+node_modules/
+npm-debug.log*
+*.tgz
+
+.env
+.env.*
+!.env.example
+
+coverage/
+
+.DS_Store
+Thumbs.db
+
+.vscode/
+.idea/
+
+*.log

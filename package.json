@@ -1,0 +1,20 @@
+{
+  "name": "jenkins-ci-cd-docker-pipeline",
+  "version": "1.0.0",
+  "description": "Jenkins CI/CD pipeline with Docker image build and Docker Hub deployment",
+  "main": "app/server.js",
+  "scripts": {
+    "start": "node app/server.js",
+    "test": "node --test",
+    "package": "npm pack"
+  },
+  "keywords": [
+    "jenkins",
+    "ci-cd",
+    "docker",
+    "devops"
+  ],
+  "author": "Narinder Kumar",
+  "license": "MIT",
+  "type": "commonjs"
+}
