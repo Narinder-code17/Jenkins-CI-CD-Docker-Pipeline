@@ -3,13 +3,8 @@ pipeline {
     agent any
 
     environment {
-    PATH = "C:\\Program Files\\nodejs;${env.PATH}"
-    APP_NAME = 'jenkins-ci-cd-docker-pipeline'
-    DOCKER_IMAGE = 'narinder15/jenkins-ci-cd-docker-pipeline'
-    DOCKER_TAG = "${BUILD_NUMBER}"
-    NODE_ENV = 'production'
-    APP_PORT = '3005'
-}
+        PATH = "C:\\Program Files\\nodejs;${env.PATH}"
+        APP_NAME = 'jenkins-ci-cd-docker-pipeline'
         DOCKER_IMAGE = 'narinder15/jenkins-ci-cd-docker-pipeline'
         DOCKER_TAG = "${BUILD_NUMBER}"
         NODE_ENV = 'production'
