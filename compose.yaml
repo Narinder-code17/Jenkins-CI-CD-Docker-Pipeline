@@ -1,0 +1,24 @@
+services:
+  app:
+    build:
+      context: .
+    image: narinder15/jenkins-ci-cd-docker-pipeline:6
+    container_name: jenkins-cicd-secure-app
+
+    ports:
+      - "127.0.0.1:3006:3005"
+
+    environment:
+      NODE_ENV: production
+      PORT: 3005
+
+    user: "node"
+    read_only: true
+
+    security_opt:
+      - no-new-privileges:true
+
+    cap_drop:
+      - ALL
+
+    restart: unless-stopped

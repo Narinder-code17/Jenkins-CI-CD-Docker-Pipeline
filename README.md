@@ -1,8 +1,10 @@
 # Jenkins CI/CD Docker Pipeline
 
-A complete CI/CD pipeline implementation using **Jenkins, GitHub, Node.js, Docker, and Docker Hub**.
+A complete CI/CD and DevSecOps pipeline implementation using **Jenkins, GitHub, Node.js, Docker, Docker Hub, Docker Compose, and Docker Scout**.
 
-The project demonstrates how source code can be automatically checked out from GitHub, built, tested, packaged, containerized using Docker, and pushed to Docker Hub through a Jenkins Declarative Pipeline.
+The project demonstrates how source code can be automatically checked out from GitHub, built, tested, packaged, containerized using Docker, security-scanned, and pushed to Docker Hub through a Jenkins Declarative Pipeline.
+
+The project also demonstrates **basic Linux hardening, Docker container hardening, dependency security auditing, and vulnerability remediation**.
 
 ---
 
@@ -10,23 +12,30 @@ The project demonstrates how source code can be automatically checked out from G
 
 This project implements an automated CI/CD workflow for a simple Node.js web application.
 
-The pipeline is designed to perform the following operations:
+The original CI/CD pipeline performs:
 
 1. Checkout source code from GitHub
 2. Install project dependencies
 3. Run automated tests
 4. Package the application
 5. Build a Docker image
-6. Authenticate with Docker Hub
-7. Push the Docker image to Docker Hub
-8. Logout from Docker Hub
+6. Security scan the Docker image
+7. Authenticate with Docker Hub
+8. Push the Docker image to Docker Hub
+9. Logout from Docker Hub
 
 The Docker image is versioned automatically using the Jenkins build number.
 
-For example:
+Previous successful Jenkins build:
 
 ```text
 narinder15/jenkins-ci-cd-docker-pipeline:5
+```
+
+A security-hardened image was subsequently built and verified:
+
+```text
+narinder15/jenkins-ci-cd-docker-pipeline:6
 ```
 
 ---
@@ -43,14 +52,19 @@ The main objectives of this project are:
 * Push the Docker image to Docker Hub
 * Configure Jenkins environment variables
 * Configure secure Jenkins credentials
-* Implement an automated test stage
+* Implement automated application testing
+* Implement Docker image vulnerability scanning
+* Apply basic Docker container hardening
+* Apply basic Linux security checks
+* Identify and remediate container vulnerabilities
+* Configure a secure Docker Compose deployment
 * Understand Blue-Green Deployment
 * Understand Rolling Deployment
-* Demonstrate an end-to-end CI/CD workflow
+* Apply DevSecOps practices to the CI/CD workflow
 
 ---
 
-## 🏗️ CI/CD Architecture
+# 🏗️ CI/CD and DevSecOps Architecture
 
 ```text
                     Developer
@@ -77,6 +91,8 @@ The main objectives of this project are:
                 |      ↓         |
                 |  Docker Build  |
                 |      ↓         |
+                | Security Scan  |
+                |      ↓         |
                 |  Docker Push   |
                 +-------+--------+
                         |
@@ -84,36 +100,51 @@ The main objectives of this project are:
                         v
                 +----------------+
                 |   Docker Hub   |
-                |                |
                 | Versioned Image|
                 +----------------+
+
+              Security Layer
+              ───────────────
+              Linux Hardening
+                    +
+              Docker Hardening
+                    +
+              npm Audit
+                    +
+              Docker Scout
 ```
 
 ---
 
-## 🛠️ Technologies Used
+# 🛠️ Technologies Used
 
-| Technology | Purpose                                   |
-| ---------- | ----------------------------------------- |
-| Jenkins    | CI/CD automation                          |
-| GitHub     | Source code management                    |
-| Git        | Version control                           |
-| Node.js    | Application runtime                       |
-| npm        | Dependency management and packaging       |
-| Docker     | Application containerization              |
-| Docker Hub | Container image registry                  |
-| Groovy     | Jenkinsfile pipeline syntax               |
-| Windows 11 | Local development and Jenkins environment |
+| Technology     | Purpose                                   |
+| -------------- | ----------------------------------------- |
+| Jenkins        | CI/CD automation                          |
+| GitHub         | Source code management                    |
+| Git            | Version control                           |
+| Node.js        | Application runtime                       |
+| npm            | Dependency management and packaging       |
+| Docker         | Application containerization              |
+| Docker Compose | Secure container deployment               |
+| Docker Scout   | Container vulnerability scanning          |
+| Docker Hub     | Container image registry                  |
+| Groovy         | Jenkinsfile pipeline syntax               |
+| WSL Ubuntu     | Linux security hardening                  |
+| Windows 11     | Local development and Jenkins environment |
 
 ---
 
-## 📂 Project Structure
+# 📂 Project Structure
 
 ```text
 Jenkins-CI-CD-Docker-Pipeline/
 │
 ├── Jenkinsfile
 ├── Dockerfile
+├── compose.yaml
+├── package.json
+├── package-lock.json
 ├── .dockerignore
 ├── .gitignore
 ├── README.md
@@ -128,16 +159,26 @@ Jenkins-CI-CD-Docker-Pipeline/
 │   ├── deployment-strategies.md
 │   └── pipeline-documentation.md
 │
-└── screenshots/
-    ├── 01-prerequisites.png
-    ├── 02-application-running.png
-    ├── 03-automated-test.png
-    ├── 04-docker-image-local.png
-    ├── 05-docker-container-running.png
-    ├── 06-github-repository.png
-    ├── 07-jenkins-pipeline-success.png
-    ├── 08-jenkins-build-success.png
-    └── 09-dockerhub-image.png
+├── screenshots/
+│   ├── 01-prerequisites.png
+│   ├── 02-application-running.png
+│   ├── 03-automated-test.png
+│   ├── 04-docker-image-local.png
+│   ├── 05-docker-container-running.png
+│   ├── 06-github-repository.png
+│   ├── 07-jenkins-pipeline-success.png
+│   ├── 08-jenkins-build-success.png
+│   ├── 09-dockerhub-image.png
+│   ├── 10-secure-compose-deployment.png
+│   ├── 11-linux-patching-status.png
+│   ├── 12-file-permission-check.png
+│   ├── 13-root-account-status.png
+│   ├── 14-security-scan-before.png
+│   └── 15-secure-deployment-final.png
+│
+├── npm-audit-report.txt
+├── security-scan-before.txt
+└── security-scan-after.txt
 ```
 
 ---
@@ -162,7 +203,7 @@ The application uses environment variables to configure the port and environment
 
 ### Environment
 
-The Docker image runs the application using:
+The production container runs:
 
 ```text
 NODE_ENV=production
@@ -180,7 +221,7 @@ Jenkinsfile
 
 The pipeline uses Jenkins Declarative Pipeline syntax.
 
-## Pipeline Stages
+## Current Pipeline Stages
 
 ```text
 Checkout
@@ -193,8 +234,14 @@ Package
    ↓
 Docker Build
    ↓
+Security Scan
+   ↓
 Docker Push
 ```
+
+The **Security Scan** stage is the DevSecOps improvement added to the pipeline.
+
+It uses Docker Scout to scan the generated Docker image for **Critical and High severity vulnerabilities**.
 
 ---
 
@@ -210,8 +257,6 @@ stage('Checkout') {
     }
 }
 ```
-
-Jenkins uses the configured GitHub credentials to access the repository.
 
 ---
 
@@ -245,12 +290,12 @@ stage('Test') {
 
 The project uses Node.js's built-in test runner.
 
-The test suite verifies:
+The tests verify:
 
 * Application default port configuration
 * Application environment configuration
 
-Successful Jenkins execution:
+Previous successful result:
 
 ```text
 2 tests
@@ -283,7 +328,7 @@ jenkins-ci-cd-docker-pipeline-1.0.0.tgz
 
 ## 5. Docker Build Stage
 
-Jenkins builds a Docker image using the project's Dockerfile.
+Jenkins builds the Docker image using the project's Dockerfile.
 
 ```groovy
 stage('Docker Build') {
@@ -294,17 +339,44 @@ stage('Docker Build') {
 }
 ```
 
-The Docker image is automatically tagged using the Jenkins build number.
+The Docker image is tagged using the Jenkins build number.
 
-For Build #5:
+Previous successful Build #5:
 
 ```text
 narinder15/jenkins-ci-cd-docker-pipeline:5
 ```
 
+A security-hardened image was manually built and verified as:
+
+```text
+narinder15/jenkins-ci-cd-docker-pipeline:6
+```
+
 ---
 
-## 6. Docker Push Stage
+## 6. Security Scan Stage
+
+The DevSecOps improvement adds a Docker Scout security scan after Docker image creation.
+
+```groovy
+stage('Security Scan') {
+    steps {
+        echo 'Scanning Docker image for Critical and High vulnerabilities...'
+        bat 'docker scout cves --exit-code --only-severity critical,high %DOCKER_IMAGE%:%DOCKER_TAG%'
+    }
+}
+```
+
+The `--exit-code` option allows the security scan to act as a pipeline security gate.
+
+Critical and High vulnerabilities can therefore prevent the pipeline from continuing to the Docker Push stage.
+
+> The updated Jenkinsfile contains this stage. A new successful Jenkins pipeline execution using this stage has not yet been recorded in this README.
+
+---
+
+## 7. Docker Push Stage
 
 The Docker Push stage authenticates with Docker Hub and pushes the generated image.
 
@@ -328,13 +400,13 @@ stage('Docker Push') {
 }
 ```
 
-The Docker Hub credentials are stored securely in Jenkins Credentials instead of being written directly into the Jenkinsfile.
+Docker Hub credentials are stored securely in Jenkins Credentials.
 
 ---
 
 # 🔐 Environment Variables
 
-The Jenkinsfile contains the following environment variables:
+The Jenkinsfile contains:
 
 ```groovy
 environment {
@@ -346,8 +418,6 @@ environment {
     APP_PORT = '3005'
 }
 ```
-
-### Environment Variable Description
 
 | Variable       | Description                              |
 | -------------- | ---------------------------------------- |
@@ -364,7 +434,7 @@ environment {
 
 The application is containerized using Docker.
 
-## Dockerfile
+## Current Dockerfile
 
 ```dockerfile
 FROM node:22-alpine
@@ -372,9 +442,7 @@ FROM node:22-alpine
 WORKDIR /app
 
 COPY package*.json ./
-
 COPY app ./app
-
 COPY tests ./tests
 
 ENV NODE_ENV=production
@@ -382,18 +450,88 @@ ENV PORT=3005
 
 EXPOSE 3005
 
+# Remove package managers not required at runtime
+RUN rm -rf /usr/local/lib/node_modules/npm \
+           /usr/local/lib/node_modules/corepack \
+           /usr/local/bin/npm \
+           /usr/local/bin/npx \
+           /usr/local/bin/corepack
+
 CMD ["node", "app/server.js"]
 ```
 
-### Docker Configuration
+### Docker Security Improvement
 
-| Configuration     | Value                |
-| ----------------- | -------------------- |
-| Base Image        | `node:22-alpine`     |
-| Working Directory | `/app`               |
-| Application Port  | `3005`               |
-| Environment       | `production`         |
-| Startup Command   | `node app/server.js` |
+The application only requires the Node.js runtime when running in production.
+
+npm and Corepack were present in the original runtime image but were not required by the application at runtime.
+
+They were therefore removed from the production image to reduce the runtime software footprint and attack surface.
+
+The secured image was tested successfully with:
+
+```text
+Node.js: v22.23.3
+npm: not available
+```
+
+The application continued to run successfully.
+
+---
+
+# 🔒 Docker Compose Security Hardening
+
+The project now includes:
+
+```text
+compose.yaml
+```
+
+Current configuration:
+
+```yaml
+services:
+  app:
+    build:
+      context: .
+    image: narinder15/jenkins-ci-cd-docker-pipeline:6
+    container_name: jenkins-cicd-secure-app
+
+    ports:
+      - "127.0.0.1:3006:3005"
+
+    environment:
+      NODE_ENV: production
+      PORT: 3005
+
+    user: "node"
+    read_only: true
+
+    security_opt:
+      - no-new-privileges:true
+
+    cap_drop:
+      - ALL
+
+    restart: unless-stopped
+```
+
+### Security Controls
+
+| Control                   | Purpose                                  |
+| ------------------------- | ---------------------------------------- |
+| `user: node`              | Runs application as a non-root user      |
+| `read_only: true`         | Makes the container filesystem read-only |
+| `cap_drop: ALL`           | Removes unnecessary Linux capabilities   |
+| `no-new-privileges:true`  | Prevents privilege escalation            |
+| `127.0.0.1` binding       | Restricts host access to localhost       |
+| `restart: unless-stopped` | Provides automatic container restart     |
+
+The configuration was validated successfully using:
+
+```text
+docker compose config
+```
 
 ---
 
@@ -427,13 +565,260 @@ test
 production
 ```
 
-### Successful Test Result
+Previous successful result:
 
 ```text
 2 tests
 2 pass
 0 fail
 ```
+
+---
+
+# 🔍 Security Scanning
+
+Security scanning was performed using **Docker Scout**.
+
+## Initial Image Scan
+
+Image:
+
+```text
+narinder15/jenkins-ci-cd-docker-pipeline:5
+```
+
+Initial scan:
+
+```text
+Critical: 0
+High:     10
+Medium:   8
+Low:      1
+Total:    19
+```
+
+Vulnerabilities were found in 8 vulnerable packages.
+
+The scan was saved as:
+
+```text
+security-scan-before.txt
+```
+
+---
+
+## Application Dependency Audit
+
+A `package-lock.json` file was generated to enable npm auditing.
+
+The application dependency audit produced:
+
+```text
+found 0 vulnerabilities
+```
+
+The result was saved as:
+
+```text
+npm-audit-report.txt
+```
+
+This indicates that the application's npm dependency set did not contain detected vulnerabilities in the audit.
+
+---
+
+# 🛡️ Security Remediation
+
+The vulnerability investigation showed that the detected vulnerabilities were associated with software included in the original container runtime image, rather than application dependencies.
+
+The production Dockerfile was hardened by removing:
+
+```text
+npm
+Corepack
+npm command wrappers
+npx command
+```
+
+The Node.js runtime was retained.
+
+A new image was built:
+
+```text
+narinder15/jenkins-ci-cd-docker-pipeline:6
+```
+
+---
+
+# ✅ Security Scan After Remediation
+
+The hardened image was scanned again using Docker Scout.
+
+Image:
+
+```text
+narinder15/jenkins-ci-cd-docker-pipeline:6
+```
+
+Result:
+
+```text
+Critical: 0
+High:     0
+Medium:   0
+Low:      0
+```
+
+Docker Scout reported:
+
+```text
+No vulnerable package detected
+```
+
+The final scan was saved as:
+
+```text
+security-scan-after.txt
+```
+
+### Before vs After
+
+| Severity            | Before `:5` | After `:6` |
+| ------------------- | ----------- | ---------- |
+| Critical            | 0           | 0          |
+| High                | 10          | 0          |
+| Medium              | 8           | 0          |
+| Low                 | 1           | 0          |
+| Total               | 19          | 0          |
+| Vulnerable packages | 8           | 0          |
+
+The scanned package count also decreased from:
+
+```text
+212 packages
+```
+
+to:
+
+```text
+26 packages
+```
+
+---
+
+# 🐧 Linux Hardening
+
+Basic Linux security checks were performed in WSL Ubuntu.
+
+## System Updates
+
+The system package list was updated and available upgrades were installed.
+
+The system reported some packages held back because of normal phased updates.
+
+These packages were not force-installed.
+
+---
+
+## Network Service Review
+
+Listening network ports were reviewed using:
+
+```text
+sudo ss -tulpn
+```
+
+Unknown listeners were identified and investigated.
+
+Ports that could not be confidently associated with an unnecessary service were **not disabled blindly**.
+
+This avoids disrupting legitimate services without sufficient evidence.
+
+---
+
+## Running Services Review
+
+Running services were reviewed using:
+
+```text
+systemctl --type=service --state=running --no-pager
+```
+
+No service was disabled without confirming that it was unnecessary.
+
+The `unattended-upgrades` service was active.
+
+---
+
+## File Permission Check
+
+World-writable files in the user's home directory were checked.
+
+Result:
+
+```text
+No world-writable files found
+```
+
+---
+
+## Root Account Check
+
+The root account status was checked using:
+
+```text
+sudo passwd -S root
+```
+
+The root account was reported as locked.
+
+---
+
+# 🚀 Secure Deployment Verification
+
+The hardened image was deployed using Docker Compose.
+
+Container:
+
+```text
+jenkins-cicd-secure-app
+```
+
+Image:
+
+```text
+narinder15/jenkins-ci-cd-docker-pipeline:6
+```
+
+Port mapping:
+
+```text
+127.0.0.1:3006 → 3005
+```
+
+Container status:
+
+```text
+Up
+```
+
+The application was then tested using:
+
+```text
+curl.exe http://127.0.0.1:3006
+```
+
+The application responded successfully with:
+
+```text
+Jenkins CI/CD Pipeline
+
+Application deployed successfully through Jenkins and Docker.
+
+Environment: production
+```
+
+This confirms that the security hardening did not prevent the application from functioning.
 
 ---
 
@@ -469,104 +854,42 @@ Purpose:
 Docker Hub authentication for image push
 ```
 
-The Docker Hub Personal Access Token is stored securely in Jenkins Credentials and is not included in the source code.
+Credentials are stored securely in Jenkins Credentials and are not hard-coded into the source code.
 
 ---
 
-# 📦 Docker Image
+# 📦 Docker Images
 
-The Docker image generated by Jenkins is:
-
-```text
-narinder15/jenkins-ci-cd-docker-pipeline
-```
-
-The Jenkins build number is used as the image tag.
-
-For the successful Build #5:
+## Previous Successful Jenkins Image
 
 ```text
 narinder15/jenkins-ci-cd-docker-pipeline:5
 ```
 
-This provides a versioned Docker image for each Jenkins pipeline execution.
+This image was successfully built and pushed during Jenkins Build #5.
 
----
-
-# ✅ Successful Pipeline Execution
-
-The successful Jenkins execution was:
+## Security-Hardened Image
 
 ```text
-Build #5
+narinder15/jenkins-ci-cd-docker-pipeline:6
 ```
 
-All pipeline stages completed successfully:
+This image was manually rebuilt after Docker runtime hardening and was successfully:
+
+* Built
+* Scanned
+* Verified
+* Started
+* Tested
+* Deployed through Docker Compose
+
+Docker Scout reported:
 
 ```text
-Checkout       → SUCCESS
-Build          → SUCCESS
-Test           → SUCCESS
-Package        → SUCCESS
-Docker Build   → SUCCESS
-Docker Push    → SUCCESS
-```
-
-Automated test result:
-
-```text
-2 tests
-2 pass
-0 fail
-```
-
-Docker image:
-
-```text
-narinder15/jenkins-ci-cd-docker-pipeline:5
-```
-
-Final Jenkins result:
-
-```text
-Finished: SUCCESS
-```
-
----
-
-# 🌐 GitHub Repository
-
-GitHub repository:
-
-```text
-https://github.com/Narinder-code17/Jenkins-CI-CD-Docker-Pipeline
-```
-
-The repository contains:
-
-* Application source code
-* Jenkinsfile
-* Dockerfile
-* Automated tests
-* Deployment strategy documentation
-* Pipeline documentation
-* Project screenshots
-* Configuration files
-
----
-
-# 🐳 Docker Hub Repository
-
-Docker Hub repository:
-
-```text
-https://hub.docker.com/r/narinder15/jenkins-ci-cd-docker-pipeline
-```
-
-The successful Jenkins pipeline published:
-
-```text
-narinder15/jenkins-ci-cd-docker-pipeline:5
+0 Critical
+0 High
+0 Medium
+0 Low
 ```
 
 ---
@@ -624,22 +947,45 @@ docs/deployment-strategies.md
 
 ---
 
-# 🔒 Security Considerations
+# 🔐 DevSecOps Practices Implemented
 
-The project follows basic CI/CD security practices:
+The project now incorporates security throughout the CI/CD workflow.
 
-* Docker Hub credentials are stored in Jenkins Credentials.
-* Docker Hub Personal Access Token is used for CI/CD authentication.
-* Credentials are not hard-coded in the Jenkinsfile.
-* Jenkins `withCredentials` is used to inject secrets during execution.
-* Docker logout is executed after pushing the image.
-* Sensitive credentials are excluded from Git commits.
+### 1. Secure Credentials
+
+Credentials are stored in Jenkins Credentials rather than directly in source code.
+
+### 2. Dependency Auditing
+
+npm auditing is used to check application dependencies.
+
+### 3. Container Vulnerability Scanning
+
+Docker Scout scans Docker images for known vulnerabilities.
+
+### 4. Security Gate
+
+The Jenkins pipeline includes a Docker Scout security stage that checks Critical and High vulnerabilities before Docker Push.
+
+### 5. Container Hardening
+
+The production container:
+
+* Runs as a non-root user
+* Uses a read-only filesystem
+* Drops Linux capabilities
+* Prevents privilege escalation
+* Exposes the application only through localhost in the Compose deployment
+
+### 6. Linux Hardening
+
+Basic system patching, service review, network-port review, file-permission checks, and root-account checks were performed.
 
 ---
 
-# 📋 CI/CD Workflow
+# 📋 CI/CD + DevSecOps Workflow
 
-The complete workflow is:
+The updated workflow is:
 
 ```text
 Developer
@@ -660,6 +1006,12 @@ Jenkins
     |
     +---- Docker Build
     |
+    +---- Security Scan
+    |          |
+    |          +---- Critical/High found → Pipeline stops
+    |          |
+    |          +---- No Critical/High → Continue
+    |
     +---- Docker Push
     |
     v
@@ -668,6 +1020,30 @@ Docker Hub
     v
 Versioned Docker Image
 ```
+
+---
+
+# 🖼️ Evidence Screenshots
+
+The project contains screenshots documenting the implementation.
+
+| Screenshot                         | Evidence                       |
+| ---------------------------------- | ------------------------------ |
+| `01-prerequisites.png`             | Required tools and environment |
+| `02-application-running.png`       | Node.js application            |
+| `03-automated-test.png`            | Automated tests                |
+| `04-docker-image-local.png`        | Local Docker image             |
+| `05-docker-container-running.png`  | Docker container               |
+| `06-github-repository.png`         | GitHub repository              |
+| `07-jenkins-pipeline-success.png`  | Jenkins pipeline               |
+| `08-jenkins-build-success.png`     | Successful Jenkins build       |
+| `09-dockerhub-image.png`           | Docker Hub image               |
+| `10-secure-compose-deployment.png` | Secure Compose deployment      |
+| `11-linux-patching-status.png`     | Linux package updates          |
+| `12-file-permission-check.png`     | File permission security check |
+| `13-root-account-status.png`       | Root account status            |
+| `14-security-scan-before.png`      | Initial Docker Scout scan      |
+| `15-secure-deployment-final.png`   | Final secured deployment       |
 
 ---
 
@@ -710,11 +1086,56 @@ Contains:
 
 ---
 
+# 🌐 GitHub Repository
+
+GitHub repository:
+
+```text
+https://github.com/Narinder-code17/Jenkins-CI-CD-Docker-Pipeline
+```
+
+The repository contains:
+
+* Application source code
+* Jenkinsfile
+* Dockerfile
+* Docker Compose configuration
+* Automated tests
+* Security configuration
+* Deployment strategy documentation
+* Pipeline documentation
+* Security scan evidence
+* Project screenshots
+
+---
+
+# 🐳 Docker Hub Repository
+
+Docker Hub repository:
+
+```text
+https://hub.docker.com/r/narinder15/jenkins-ci-cd-docker-pipeline
+```
+
+Previous successful Jenkins image:
+
+```text
+narinder15/jenkins-ci-cd-docker-pipeline:5
+```
+
+Security-hardened image:
+
+```text
+narinder15/jenkins-ci-cd-docker-pipeline:6
+```
+
+---
+
 # 🏁 Conclusion
 
-This project demonstrates an end-to-end Jenkins CI/CD pipeline integrated with GitHub and Docker Hub.
+This project demonstrates an end-to-end Jenkins CI/CD and DevSecOps workflow integrated with GitHub and Docker.
 
-The pipeline automatically:
+The pipeline performs:
 
 ```text
 Checkout
@@ -727,9 +1148,39 @@ Package
    ↓
 Docker Build
    ↓
+Security Scan
+   ↓
 Docker Push
 ```
 
-The successful Jenkins Build #5 confirms that the application can be automatically tested, packaged, containerized, and published as a versioned Docker image.
+The project was extended with practical security improvements including:
 
-The project provides practical experience with CI/CD automation, Jenkins Declarative Pipelines, GitHub integration, Docker containerization, secure credentials management, automated testing, Docker Hub publishing, and deployment strategies.
+* npm dependency auditing
+* Docker Scout vulnerability scanning
+* Docker runtime hardening
+* Non-root container execution
+* Read-only container filesystem
+* Linux capability removal
+* No-new-privileges protection
+* Localhost-only deployment
+* Basic Linux hardening
+* Automated Critical/High vulnerability gating in Jenkins
+
+The initial Docker image contained:
+
+```text
+19 detected vulnerabilities
+```
+
+After removing unnecessary runtime package managers and rebuilding the image, Docker Scout reported:
+
+```text
+0 Critical
+0 High
+0 Medium
+0 Low
+```
+
+The final security-hardened image was also deployed and tested successfully, confirming that the application continued to operate correctly after the security improvements.
+
+The project provides practical experience with **CI/CD automation, Jenkins Declarative Pipelines, GitHub integration, Docker containerization, Docker Compose, Docker Scout, DevSecOps, secure credentials management, automated testing, vulnerability remediation, Linux hardening, Docker Hub publishing, and deployment strategies**.

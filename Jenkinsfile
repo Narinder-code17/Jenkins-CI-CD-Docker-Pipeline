@@ -47,6 +47,13 @@ pipeline {
                 bat 'docker build -t %DOCKER_IMAGE%:%DOCKER_TAG% .'
             }
         }
+        
+        stage('Security Scan') {
+            steps {
+                echo 'Scanning Docker image for Critical and High vulnerabilities...'
+                bat 'docker scout cves --exit-code --only-severity critical,high %DOCKER_IMAGE%:%DOCKER_TAG%'
+            }
+        }
 
         stage('Docker Push') {
             steps {
