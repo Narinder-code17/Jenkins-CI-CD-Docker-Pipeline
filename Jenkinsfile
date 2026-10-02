@@ -1,3 +1,4 @@
+```groovy
 pipeline {
 
     agent any
@@ -47,11 +48,31 @@ pipeline {
                 bat 'docker build -t %DOCKER_IMAGE%:%DOCKER_TAG% .'
             }
         }
-        
+
         stage('Security Scan') {
             steps {
-                echo 'Scanning Docker image for Critical and High vulnerabilities...'
-                bat '"C:\\Users\\narin\\.docker\\cli-plugins\\docker-scout.exe" cves %DOCKER_IMAGE%:%DOCKER_TAG% --exit-code --only-severity critical,high'
+                echo 'Logging into Docker Hub for Docker Scout security scan...'
+
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKER_USERNAME',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )
+                ]) {
+                    script {
+                        try {
+                            bat 'echo %DOCKER_PASSWORD%| docker login -u %DOCKER_USERNAME% --password-stdin'
+
+                            echo 'Scanning Docker image for Critical and High vulnerabilities...'
+
+                            bat '"C:\\Users\\narin\\.docker\\cli-plugins\\docker-scout.exe" cves %DOCKER_IMAGE%:%DOCKER_TAG% --exit-code --only-severity critical,high'
+
+                        } finally {
+                            bat 'docker logout'
+                        }
+                    }
+                }
             }
         }
 
@@ -89,3 +110,4 @@ pipeline {
         }
     }
 }
+```
