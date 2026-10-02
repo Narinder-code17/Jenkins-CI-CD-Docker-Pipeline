@@ -92,12 +92,30 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying the tested Docker image using Docker Compose...'
+
+                bat 'docker compose down --remove-orphans'
+                bat 'docker compose up -d'
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                echo 'Checking application health...'
+
+                bat 'powershell -NoProfile -Command "$ok=$false; for($i=1; $i -le 10; $i++){ try { $r=Invoke-WebRequest -Uri http://127.0.0.1:3006 -UseBasicParsing -TimeoutSec 5; if($r.StatusCode -eq 200){ $ok=$true; Write-Host \\"Health check passed on attempt $i\\"; break } } catch { Write-Host \\"Waiting for application... attempt $i\\" }; Start-Sleep -Seconds 2 }; if(-not $ok){ Write-Error \\"Application health check failed\\"; exit 1 }"'
+            }
+        }
     }
 
     post {
         success {
             echo 'CI/CD pipeline completed successfully.'
-            echo "Docker image pushed: ${DOCKER_IMAGE}:${DOCKER_TAG}"
+            echo "Docker image deployed: ${DOCKER_IMAGE}:${DOCKER_TAG}"
+            echo 'Application health check passed.'
         }
 
         failure {

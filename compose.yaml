@@ -1,8 +1,6 @@
 services:
   app:
-    build:
-      context: .
-    image: narinder15/jenkins-ci-cd-docker-pipeline:6
+    image: "${DOCKER_IMAGE}:${DOCKER_TAG}"
     container_name: jenkins-cicd-secure-app
 
     ports:
