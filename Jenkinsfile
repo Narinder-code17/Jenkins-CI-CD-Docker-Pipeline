@@ -102,12 +102,12 @@ pipeline {
                 bat 'docker run -d --name jenkins-cicd-secure-app --restart unless-stopped -p 127.0.0.1:3006:3005 -e NODE_ENV=production -e PORT=3005 --user node --read-only --security-opt no-new-privileges:true --cap-drop ALL %DOCKER_IMAGE%:%DOCKER_TAG%'
             }
         }
-        
+
         stage('Health Check') {
             steps {
                 echo 'Checking application health...'
 
-                bat 'powershell -NoProfile -Command "$ok=$false; for($i=1; $i -le 10; $i++){ try { $r=Invoke-WebRequest -Uri http://127.0.0.1:3006 -UseBasicParsing -TimeoutSec 5; if($r.StatusCode -eq 200){ $ok=$true; Write-Host \\"Health check passed on attempt $i\\"; break } } catch { Write-Host \\"Waiting for application... attempt $i\\" }; Start-Sleep -Seconds 2 }; if(-not $ok){ Write-Error \\"Application health check failed\\"; exit 1 }"'
+                bat '"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -NoProfile -Command "$ok=$false; for($i=1; $i -le 10; $i++){ try { $r=Invoke-WebRequest -Uri http://127.0.0.1:3006 -UseBasicParsing -TimeoutSec 5; if($r.StatusCode -eq 200){ $ok=$true; Write-Host \\"Health check passed on attempt $i\\"; break } } catch { Write-Host \\"Waiting for application... attempt $i\\" }; Start-Sleep -Seconds 2 }; if(-not $ok){ Write-Error \\"Application health check failed\\"; exit 1 }"'
             }
         }
     }
