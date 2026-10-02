@@ -95,13 +95,14 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo 'Deploying the tested Docker image using Docker Compose...'
+                echo 'Deploying the tested and security-scanned Docker image...'
 
-                bat 'docker compose down --remove-orphans'
-                bat 'docker compose up -d'
+                bat 'docker rm -f jenkins-cicd-secure-app >nul 2>&1 || ver >nul'
+
+                bat 'docker run -d --name jenkins-cicd-secure-app --restart unless-stopped -p 127.0.0.1:3006:3005 -e NODE_ENV=production -e PORT=3005 --user node --read-only --security-opt no-new-privileges:true --cap-drop ALL %DOCKER_IMAGE%:%DOCKER_TAG%'
             }
         }
-
+        
         stage('Health Check') {
             steps {
                 echo 'Checking application health...'
