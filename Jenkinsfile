@@ -51,8 +51,7 @@ pipeline {
         stage('Security Scan') {
             steps {
                 echo 'Scanning Docker image for Critical and High vulnerabilities...'
-                bat 'docker scout version'
-                bat 'docker scout cves %DOCKER_IMAGE%:%DOCKER_TAG% --exit-code --only-severity critical,high'
+                bat '"C:\\Users\\narin\\.docker\\cli-plugins\\docker-scout.exe" cves %DOCKER_IMAGE%:%DOCKER_TAG% --exit-code --only-severity critical,high'
             }
         }
 
